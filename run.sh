@@ -16,7 +16,7 @@ else
     echo "Running benchmark with $algorithm on dataset $dset_name."
 fi
 
-recalculate=false
+recalculate=true; # false;
 
 while getopts ":r" opt; do
   case $opt in
