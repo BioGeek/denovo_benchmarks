@@ -86,6 +86,11 @@ def test_correct_prediction_matches_its_label(mapper, utils, aa_match_batch, aa_
         assert bool(exact), f"no exact match for {predicted!r} against {truth!r}"
 
 
+# Third-party packages evaluation.utils pulls in. A missing one of these is an environment gap, not a
+# defect, and only these justify skipping the end-to-end check.
+OPTIONAL_DEPENDENCIES = frozenset({"numpy", "pandas", "pyteomics", "tqdm", "sqlalchemy", "lxml"})
+
+
 def main():
     # Importable from anywhere: evaluation/ lives at the repository root, one level up from tests/.
     sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
@@ -108,15 +113,19 @@ def main():
             failures.append((check.__name__, exc))
             print(f"  FAIL  {check.__name__}: {exc}")
 
-    # The end-to-end match needs numpy and pyteomics via evaluation.utils. Report rather than fail if absent,
-    # so the notation checks above still run in a bare environment.
+    # The end-to-end match needs third-party packages via evaluation.utils. Skip if one of those is
+    # genuinely absent, so the notation checks above still run in a bare environment. Anything else -
+    # a syntax error in evaluation/, a name that no longer exists, an import-time failure - must surface
+    # rather than be reported as a skip.
     try:
         from evaluation import utils
         from evaluation.metrics import aa_match_batch
         from evaluation.token_masses import AA_MASSES
-    except Exception as exc:  # noqa: BLE001
-        print(f"  skip  test_correct_prediction_matches_its_label "
-              f"(evaluation.utils unavailable: {type(exc).__name__}: {exc})")
+    except ModuleNotFoundError as exc:
+        missing = (exc.name or "").split(".")[0]
+        if missing not in OPTIONAL_DEPENDENCIES:
+            raise
+        print(f"  skip  test_correct_prediction_matches_its_label ({missing} is not installed)")
     else:
         try:
             test_correct_prediction_matches_its_label(mapper, utils, aa_match_batch, AA_MASSES)
