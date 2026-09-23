@@ -1,10 +1,21 @@
-# Testing run_dataset.sh
+# Tests
 
-This directory contains test suites for the `run_dataset.sh` script.
+This directory contains the test suites for the benchmark's own code: the `run_dataset.sh` pipeline script
+and the evaluation modules.
 
 ## Test Framework
 
-We use [BATS (Bash Automated Testing System)](https://github.com/bats-core/bats-core) for testing bash scripts.
+Bash scripts are tested with [BATS (Bash Automated Testing System)](https://github.com/bats-core/bats-core).
+
+Python modules are tested with plain `assert` in standalone scripts that run under the interpreter
+directly, with no test runner or third-party dependency:
+
+```bash
+python tests/test_ground_truth_notation.py
+```
+
+A check whose dependencies are missing reports `skip` and does not fail the run, so the suite stays usable
+in an environment that has only the standard library.
 
 ## Installation
 
@@ -41,6 +52,8 @@ bats --tap tests/test_run_dataset.bats
 - **`test_run_dataset.bats`** - Unit tests for individual components and logic
 - **`test_run_dataset_integration.bats`** - End-to-end integration tests (require mocking)
 - **`run_tests.sh`** - Convenient test runner that checks dependencies
+- **`test_ground_truth_notation.py`** - Ground-truth label formatting: that a correctly predicted peptide
+  matches its own label under `aa_match_batch`, and that `format_sequence` is idempotent
 
 ## Test Coverage
 

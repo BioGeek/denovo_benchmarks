@@ -20,9 +20,10 @@ The assertions target the end property - a correct prediction matches its label 
 either string, so the two separate implementations of the folding cannot drift apart unnoticed.
 
 Runs standalone (no pytest required):
-    python test_ground_truth_notation.py
+    python tests/test_ground_truth_notation.py
 """
 
+import pathlib
 import sys
 
 # (label as distributed, the same peptide predicted correctly in the wrappers' UNIMOD notation)
@@ -86,7 +87,8 @@ def test_correct_prediction_matches_its_label(mapper, utils, aa_match_batch, aa_
 
 
 def main():
-    sys.path.insert(0, ".")
+    # Importable from anywhere: evaluation/ lives at the repository root, one level up from tests/.
+    sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
     from evaluation import ground_truth_mapper as mapper
 
     # These five need no heavy dependencies.
