@@ -54,6 +54,15 @@ def test_mod_on_modified_first_residue_sums(mapper):
     assert out.startswith("M[+58.0055]"), out
 
 
+def test_formatting_is_idempotent(mapper):
+    """An already-formatted label must survive a second pass unchanged."""
+    for label in ("n[57.0215]SNWEAGK", "[57.0215]SNWEAGK", "n[42.0106]M[15.9949]GGGSAPYGK",
+                  "n[-17.0265]QGGSAPYGK", "MSGEC[57.0215]APNK", "SSSSGSVGESSSK"):
+        once = mapper.format_sequence(label)
+        twice = mapper.format_sequence(once)
+        assert twice == once, f"{label}: {once} -> {twice}"
+
+
 def test_unmodified_and_internal_mods_untouched(mapper):
     assert mapper.format_sequence("SSSSGSVGESSSK") == "SSSSGSVGESSSK"
     assert mapper.format_sequence("MSGEC[57.0215]APNK") == "MSGEC[+57.0215]APNK"
@@ -80,11 +89,12 @@ def main():
     sys.path.insert(0, ".")
     from evaluation import ground_truth_mapper as mapper
 
-    # These four need no heavy dependencies.
+    # These five need no heavy dependencies.
     light = [
         test_notation_accepts_both_label_forms,
         test_n_term_mod_is_folded_not_left_as_prefix,
         test_mod_on_modified_first_residue_sums,
+        test_formatting_is_idempotent,
         test_unmodified_and_internal_mods_untouched,
     ]
     failures = []

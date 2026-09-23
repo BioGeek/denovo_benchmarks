@@ -45,7 +45,9 @@ def _transform_match_ptm(match: re.Match) -> str:
     """
     aa, ptm = match.group(1), match.group(2)
 
-    if not ptm.startswith("-"):
+    # Accept an already-signed delta unchanged, so format_sequence is idempotent: re-signing "+57.02"
+    # would yield "[++57.02]".
+    if not ptm.startswith(("+", "-")):
         ptm = "+" + ptm
     return f"{aa}[{ptm}]"
 
@@ -59,7 +61,9 @@ def _transform_match_n_term_mod(match: re.Match) -> str:
     """
     ptm = match.group(1)
     
-    if not ptm.startswith("-"):
+    # Accept an already-signed delta unchanged, so format_sequence is idempotent: re-signing "+57.02"
+    # would yield "[++57.02]".
+    if not ptm.startswith(("+", "-")):
         ptm = "+" + ptm
     return f"[{ptm}]-"
 
